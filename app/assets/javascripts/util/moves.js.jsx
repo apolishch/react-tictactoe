@@ -51,8 +51,8 @@ const random = (board) => {
 	return board.setIn([Math.floor(move/3), move % 3], 'opponent')
 }
 
-const scoreState = (board, depth, victory, desiredVictor) => {
-	if (victory.get(0) && (victory.get(1) === desiredVictor)) {
+const scoreState = (board, depth, victory, player) => {
+	if (victory.get(0) && (victory.get(1) === player)) {
     	return 10 - depth
 	} else if (victory.get(0) && (victory.get(1) !== null)) {
 		return depth - 10
@@ -62,37 +62,42 @@ const scoreState = (board, depth, victory, desiredVictor) => {
 }
 
 const minMax = (board, maximizePlayer, nextMove, lowerBound, upperBound) => {
-    let lowestState = Immutable.List(board)
-    let highestState = Immutable.List(board)
     let move = Immutable.List(board)
     
     const comingMove = nextMove === 'opponent' ? 'you' : 'opponent'
     const empties = emptyFields(board)
     const depth = 9 - empties.size
     const victory = victoryCheck(board)
+
+    let scores = Immutable.List([])
+    let moves = Immutable.List([])
+    let forceMove = null
     
-    lowerBound = lowerBound ? lowerBound : Infinity
-    upperBound = upperBound ? upperBound : -Infinity
-    
-    if (empties.size === 0 || victory.get(0)) {
-    	return Immutable.List([board, scoreState(board, depth, victory, 'opponent')])
+    //clever shortcut heuristic and/or cheating
+    if (maximizePlayer && (board.getIn([1,1]) === null)) {
+    	return Immutable.List([board.setIn([1,1], 'opponent'), Infinity])
     }
 
-    empties.map((fieldIndex) => {
-    	move = board.setIn([Math.floor(fieldIndex/3), fieldIndex %3], nextMove)
-    	score = minMax(Immutable.List(move), maximizePlayer, comingMove, lowerBound, upperBound).get(1)
-    	if (lowerBound >= score || lowestState.isEmpty()) {
-    		lowestState = move
-    		lowerBound = score
-    	}
-    	if (upperBound <= score || highestState.isEmpty()) {
-    		highestState = move
-    		upperBound = score
-    	}
+    if (empties.size === 0 || victory.get(0)) {
+    	return Immutable.List([board, scoreState(board, depth, victory, nextMove)])
+    }
+  
+    empties.every((fieldIndex) => {
+    	const row = Math.floor(fieldIndex/3)
+    	const col = fieldIndex % 3
+    	move = board.setIn([row, col], nextMove)
+		moves = moves.push(move)
+		score = minMax(Immutable.List(move), maximizePlayer, comingMove, lowerBound, upperBound).get(1)
+		scores = scores.push(score)
+		return true
     })
     if (maximizePlayer || (nextMove === 'you')) {
+    	const upperBound = scores.max()
+    	const highestState = moves.get(scores.indexOf(upperBound))
     	return Immutable.List([highestState, upperBound])
     } else {
+    	const lowerBound = scores.max()
+    	const lowestState = moves.get(scores.indexOf(lowerBound))
     	return Immutable.List([lowestState, lowerBound])
     }
 
