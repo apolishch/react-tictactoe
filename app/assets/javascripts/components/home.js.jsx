@@ -13,7 +13,8 @@ class HomeComponent extends React.Component {
   			difficulty: null,
   			type: null,
   			nextMove: null,
-  			victor: null
+  			victor: null,
+  			draw: null
   		})
   	}
   }
@@ -49,7 +50,7 @@ class HomeComponent extends React.Component {
   }
 
   makeMove (fieldIndex, rowIndex) {
-  	if ((this.state.data.get('victor') === null) && (this.state.data.getIn(['board', rowIndex, fieldIndex]) === null) && ((this.state.data.get('nextMove') === 'you') || (this.state.data.get('type') === 'hotSeat'))) {
+  	if ((!this.state.data.get('draw')) &&(this.state.data.get('victor') === null) && (this.state.data.getIn(['board', rowIndex, fieldIndex]) === null) && ((this.state.data.get('nextMove') === 'you') || (this.state.data.get('type') === 'hotSeat'))) {
   		gameStore.dispatch({
   						type: 'MAKE_MOVE', 
   						board: this.state.data.get('board').setIn([rowIndex, fieldIndex], this.state.data.get('nextMove'))
@@ -117,6 +118,8 @@ class HomeComponent extends React.Component {
   			{() => {
   				if (this.state.data.get('victor')) {
   					return(<label className='victory-message'> The Winner is {this.state.data.get('victor')}</label>)
+  				} else if (this.state.data.get('draw')) {
+  					return(<label className='draw-message'> Its a draw</label>)
   				}
   			}()}
   			<div className='board'>{() => {
