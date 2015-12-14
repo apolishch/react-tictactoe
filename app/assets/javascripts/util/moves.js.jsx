@@ -51,13 +51,67 @@ const random = (board) => {
 	return board.setIn([Math.floor(move/3), move % 3], 'opponent')
 }
 
+const scoreState = (board, depth) => {
+	const victor = victoryCheck(board).get(1)
+	if (victor === 'you') {
+    	return 10 - depth
+	} else if (victor === 'opponent') {
+		return depth - 10
+	} else {
+		return 0
+	}
+}
+
+const minMax = (board, depth, maximizePlayer, nextMove, lowerBound, upperBound) => {
+	depth = depth+1
+    let lowestState = Immutable.List([])
+    let highestState = Immutable.List([])
+    
+    const comingMove = nextMove === 'opponent' ? 'you' : 'opponent'
+    const empties = emptyFields(board)
+    
+    upperBound = upperBound ? upperBound : emptyFields(board).size + 1
+    lowerBound = lowerBound ? lowerBound : -upperBound
+    
+    if (empties.size === 0) {
+    	return Immutable.List([board, scoreState(board)])
+    }
+
+    empties.map((fieldIndex) => {
+    	move = board.setIn([Math.floor(fieldIndex/3), fieldIndex %3], nextMove)
+    	score = minMax(move, depth, !maximizePlayer, comingMove, lowerBound, upperBound).get(1)
+    	highestState = move
+    	lowestState = move
+    	if (lowerBound >= score) {
+    		lowestState = move
+    		lowerBound = score
+    	}
+    	if (upperBound <= score) {
+    		highestState = move
+    		upperBound = score
+    	}
+    })
+    console.log(move.toJS())
+    if (maximizePlayer) {
+    	return Immutable.List([highestState, upperBound])
+    } else {
+    	return Immutable.List([lowestState, lowerBound])
+    }
+
+}
+
+const maxMin = (board, depth) => {
+	return minMax(board, depth, false, 'opponent')
+}
+
+
 const makeMove = (board, difficulty) => {
 	if (difficulty === 'hard') {
-		return minMax (board)
+		return minMax (board, 0, true, 'opponent').get(0)
 	} else if (difficulty === 'medium') {
 		return random (board)
 	} else {
-		return maxMin (board)
+		return maxMin (board, 0).get(0)
 	}
 }
 
