@@ -105,7 +105,7 @@ class HomeComponent extends React.Component {
   		return (<span>{() => {
   			return this.renderDifficultySelection.bind(this)()
   		}()}</span>)
-  	} else if(this.state.data.get('order') === null) {
+    }  else if(this.state.data.get('order') === null) {
   		return (<span>{() => {
   			return this.renderOrderSelection.bind(this)()
   		}()}</span>)

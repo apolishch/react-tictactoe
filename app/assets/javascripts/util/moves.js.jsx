@@ -121,8 +121,6 @@ const makeMove = (board, difficulty) => {
 const getMove = (board, type, difficulty) => {
   if ((type === 'single') && (!victoryCheck(board).get(0))) {
   	return makeMove (board, difficulty)
-  } else if(type === 'remote') {
-  	getApiMove()
   }
   return board
 }

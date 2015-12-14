@@ -1,5 +1,4 @@
 const gameTypes = Immutable.List([
   Immutable.Map({value: 'single', label: 'Single Player'}),
-  Immutable.Map({value: 'hotSeat', label: 'Hot Seat Multiplayer'}),
-  Immutable.Map({value: 'remote', label: 'Online Multiplayer'})
+  Immutable.Map({value: 'hotSeat', label: 'Hot Seat Multiplayer'})
 ])
