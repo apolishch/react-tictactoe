@@ -12,7 +12,8 @@ class HomeComponent extends React.Component {
   			order: null,
   			difficulty: null,
   			type: null,
-  			nextMove: null
+  			nextMove: null,
+  			victor: null
   		})
   	}
   }
@@ -48,13 +49,15 @@ class HomeComponent extends React.Component {
   }
 
   makeMove (fieldIndex, rowIndex) {
-  	gameStore.dispatch({
+  	if ((this.state.data.get('victor') === null) && (this.state.data.getIn(['board', rowIndex, fieldIndex]) === null) && ((this.state.data.get('nextMove') === 'you') || (this.state.data.get('type') === 'hotSeat'))) {
+  		gameStore.dispatch({
   						type: 'MAKE_MOVE', 
   						board: this.state.data.get('board').setIn([rowIndex, fieldIndex], this.state.data.get('nextMove'))
   						})
+  	}
   }
 
-  renderField (field, fieldIndex, rowIndex) {
+  renderField (field) {
   	let you = null
   	let opponent = null
   	let fieldValue = null
@@ -71,12 +74,12 @@ class HomeComponent extends React.Component {
   			fieldValue = field === 'you' ? 'O' : 'X'
   		}
   	}
-    return(<div className={field ? eval(field) : 'none'} onClick={this.makeMove.bind(this, fieldIndex, rowIndex)}>{fieldValue}</div>)
+    return(<div className={field ? eval(field) : 'none'}>{fieldValue}</div>)
   }
 
   renderRow (row, rowIndex) {
   	return(<div className='row'>{() => {return row.map((field, index) => {
-      return (<div className='col-md-4' key={index}>{() => {return this.renderField.bind(this)(field, index, rowIndex)}()}</div>)
+      return (<div className='col-md-4' key={index} onClick={this.makeMove.bind(this, index, rowIndex)}>{() => {return this.renderField.bind(this)(field, index, rowIndex)}()}</div>)
   	})}()}</div>)
   }
 
@@ -110,9 +113,16 @@ class HomeComponent extends React.Component {
   			<div className='btn btn-primary' onClick={this.newGame.bind(this)}>New Game </div>
   			<br/>
   			<label className='next-move'>Next Move: {this.state.data.get('nextMove')}</label>
+  			<br/>
+  			{() => {
+  				if (this.state.data.get('victor')) {
+  					return(<label className='victory-message'> The Winner is {this.state.data.get('victor')}</label>)
+  				}
+  			}()}
   			<div className='board'>{() => {
   				return this.renderBoard.bind(this)()
   			}()}</div>
+
   		</span>)
   	}
   }

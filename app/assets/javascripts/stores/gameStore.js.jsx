@@ -3,7 +3,8 @@ const initialState = Immutable.Map({
 	order: null,
 	difficulty: null,
 	type: null,
-	nextMove: null
+	nextMove: null,
+	victor: null
 })
 
 const configHandler = (state, action) => {
@@ -43,10 +44,45 @@ const moveHandler = (state, action) => {
 	return newState
 }
 
+const victoryHandler = (state) => {
+	let newState = undefined
+	let victory = false
+	let victoryValue = false
+	if (state.getIn(['board', 1, 1]) !== null) {
+		victory = victories.get('central').some((victory) => {
+			return victory.every((victoryPath) => {
+				return state.getIn(victoryPath) === state.getIn(['board', 1, 1])
+			})
+		})
+		victoryValue = state.getIn(['board', 1, 1])
+	} else if (state.getIn(['board', 0, 0]) !== null ) {
+		victory = victories.get('topRight').some((victory) => {
+			return victory.every((victoryPath) => {
+				return state.getIn(victoryPath) === state.getIn(['board', 0, 0])
+			})
+		})		
+		victoryValue = state.getIn(['board', 0, 0])
+	} else if (state.getIn(['board', 2, 2]) !== null ) {
+		victory = victories.get('bottomLeft').some((victory) => {
+			return victory.every((victoryPath) => {
+				return state.getIn(victoryPath) === state.getIn(['board', 0, 0])
+			})
+		})
+		victoryValue = state.getIn(['board', 2, 2])
+	}
+	if (victory) {
+		newState = state.set('victor', victoryValue)
+	} else {
+		newState = state
+	}
+	return newState
+}
+
 const storeHandler = (state=initialState, action) => {
 	let newState = undefined
 	newState = configHandler(state, action)
 	newState = moveHandler(newState, action)
+	newState = victoryHandler(newState)
 	return newState
 }
 
