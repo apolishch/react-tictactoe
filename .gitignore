@@ -15,3 +15,14 @@
 /log/*
 !/log/.keep
 /tmp
+
+# Ignore Swap files
+.*.swp
+*~
+*~HEAD
+.#*
+[#]*[#]
+.DS_Store
+
+# Ignore Gemfile.lock
+Gemfile.lock
